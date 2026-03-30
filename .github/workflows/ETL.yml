@@ -3,14 +3,15 @@ name: Crypto ETL Pipeline
 on:
   schedule:
     - cron: '0 2 * * *'   
-  workflow_dispatch:       # allows manual run button
+  workflow_dispatch:
 
 jobs:
   run-etl:
     runs-on: ubuntu-latest
 
     env:
-      N8N_link: ${{ secrets.N8N_link }}
+      coin_geko_api_key: ${{ secrets.COIN_GEKO_API_KEY }}
+      n8n_web_hook: ${{ secrets.N8N_WEB_HOOK }}
 
     steps:
       - name: Checkout repository
@@ -23,6 +24,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install requests pandas python-dotenv
+
+      - name: Create raw_protfolio.csv from Secret
+        env:
+          PORTFOLIO_DATA: ${{ secrets.CLIENT_PORTFOLIO_CSV }}
+        run: echo "$PORTFOLIO_DATA" > raw_protfolio.csv
 
       - name: Run ETL script
         run: python main_code.py
