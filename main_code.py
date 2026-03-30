@@ -90,7 +90,7 @@ def web_hook(conclusion):
         response = requests.post(os.environ.get("n8n_web_hook"),files=files,data=payload)
     return()
 
-web_hook()
+web_hook(conclusion)
     
 
     
