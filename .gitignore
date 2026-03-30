@@ -9,3 +9,6 @@ test.py
 
 # env files
 .env
+
+# Python Cache (Junk files Python makes automatically)
+__pycache__/
