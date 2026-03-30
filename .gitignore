@@ -1,0 +1,11 @@
+#json files
+*.json
+
+#csv files
+*.csv
+
+#python test
+test.py
+
+# env files
+.env
