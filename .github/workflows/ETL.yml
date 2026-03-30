@@ -1,0 +1,28 @@
+name: Crypto ETL Pipeline
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   
+  workflow_dispatch:       # allows manual run button
+
+jobs:
+  run-etl:
+    runs-on: ubuntu-latest
+
+    env:
+      N8N_link: ${{ secrets.N8N_link }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests pandas python-dotenv
+
+      - name: Run ETL script
+        run: python main_code.py
