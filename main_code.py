@@ -84,8 +84,8 @@ def web_hook(conclusion):
             "data" : ("Coin_Info.csv",f,"text/csv")
         }
         payload = {
-            "net income statement" : conclusion[0],
-            "protfolio cryptocurrency" : conclusion[1]
+            "net income statement" : conclusion["net income statement"],
+            "protfolio cryptocurrency" : conclusion["protfolio cryptocurrency"]
         }
         response = requests.post(os.environ.get("n8n_web_hook"),files=files,data=payload)
     return()
