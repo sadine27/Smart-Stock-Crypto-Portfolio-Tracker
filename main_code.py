@@ -16,6 +16,7 @@ def extract_data():
         response = requests.get(url,headers=headers)
     except KeyError : 
         print("THE 'COIN GEKO' API KEY IS EXPIRED/LIMIT HAS REACHED -  PLEASE TRY LATER")
+        exit()
     data = response.json()
     return(data)
 
@@ -93,10 +94,7 @@ def extract_stock():
             "function" : "TIME_SERIES_DAILY",
             "symbol" : stock_symbol
         }
-        try:
-            r = requests.get("https://www.alphavantage.co/query",params=payload)
-        except KeyError:
-            print("THE 'ALPHA VINTAGE STOCK' API KEY IS EXPIRED/LIMIT HAS REACHED -  PLEASE TRY LATER")
+        r = requests.get("https://www.alphavantage.co/query",params=payload)
         time.sleep(1)
         print("extraction successful")
         data = r.json()
@@ -161,7 +159,7 @@ def Merge_Csv(conclusion,conclusionI):
 
 conclusion_final = Merge_Csv(conclusion,conclusionI)
 
-def web_hook():
+def web_hook(conclusion_final):
     with open ("master_data.csv","rb") as f:
         files = {
             "data" : ("master_data.csv",f,"text/csv")
