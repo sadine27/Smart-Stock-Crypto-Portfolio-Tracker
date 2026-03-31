@@ -12,11 +12,14 @@ def extract_data():
     headers =  {
         "x-cg-demo-api-key" : os.environ.get("coin_geko_api_key")
     }
-    response = requests.get(url,headers=headers)
+    try :
+        response = requests.get(url,headers=headers)
+    except KeyError : 
+        print("THE 'COIN GEKO' API KEY IS EXPIRED/LIMIT HAS REACHED -  PLEASE TRY LATER")
     data = response.json()
     return(data)
 
-# data = extract_data()
+data = extract_data()
 
 def make_DataJson(data):
     with open("coin_list.json","w") as f:
@@ -24,7 +27,7 @@ def make_DataJson(data):
     print("coin_list.json created successfully")
     return()
 
-# make_DataJson(data)
+make_DataJson(data)
 
 def select_protfolio_coins(data):
     req_coins = []
@@ -50,7 +53,7 @@ def select_protfolio_coins(data):
     print("coin_list.json updated successfully")
     return(req_coins)
 
-# req_coins = select_protfolio_coins(data)
+req_coins = select_protfolio_coins(data)
 
 def make_CoinCSV(req_coins):
     coins = pd.DataFrame(req_coins)
@@ -77,7 +80,7 @@ def make_CoinCSV(req_coins):
     print("File Successfully Created")
     return(conclusion)
 
-# conclusion  = make_CoinCSV(req_coins)
+conclusion  = make_CoinCSV(req_coins)
 
 def extract_stock():
     master_data = []
@@ -90,7 +93,10 @@ def extract_stock():
             "function" : "TIME_SERIES_DAILY",
             "symbol" : stock_symbol
         }
-        r = requests.get("https://www.alphavantage.co/query",params=payload)
+        try:
+            r = requests.get("https://www.alphavantage.co/query",params=payload)
+        except KeyError:
+            print("THE 'ALPHA VINTAGE STOCK' API KEY IS EXPIRED/LIMIT HAS REACHED -  PLEASE TRY LATER")
         time.sleep(1)
         print("extraction successful")
         data = r.json()
@@ -139,19 +145,35 @@ def create_csv(req_data):
 
 conclusionI = create_csv(req_data)
 
-# def Merge_Csv():
+def Merge_Csv(conclusion,conclusionI):
+    conclusion_final = {
+        "net income statement - Crypto" : conclusion["net income statement"],
+        "net income statement - Stocks" : conclusionI["net income statement"],
+        "portfolio - Crypto" : conclusion["protfolio cryptocurrency"],
+        "portfolio - Stocks" : conclusionI["protfolio stock"]
+    }
+    coin = pd.read_csv("Coin_Info.csv")
+    stock = pd.read_csv("Stock_Info.csv")
+    master_data = pd.merge(coin,stock,how="outer")
+    master_data.to_csv("master_data.csv",index=False)
+    print("master table created successfully")
+    return(conclusion_final)
 
+conclusion_final = Merge_Csv(conclusion,conclusionI)
 
-def web_hook(conclusion,conclusionI):
-    with open ("Coin_Info.csv","rb") as f:
+def web_hook():
+    with open ("master_data.csv","rb") as f:
         files = {
-            "data" : ("Coin_Info.csv",f,"text/csv")
+            "data" : ("master_data.csv",f,"text/csv")
         }
         payload = {
-            "net income statement cryptocurrency" : conclusion["net income statement"],
-            "protfolio cryptocurrency" : conclusion["protfolio cryptocurrency"]
+            "net income statement cryptocurrency" : conclusion_final["net income statement - Crypto"],
+            "protfolio cryptocurrency" : conclusion_final["portfolio - Crypto"],
+            "net income statement stocks" : conclusion_final["net income statement - Stocks"],
+            "protfolio stocks" : conclusion_final["portfolio - Stocks"]
         }
         response = requests.post(os.environ.get("n8n_web_hook"),files=files,data=payload)
+        print("response sent successfully")
     return()
 
-# web_hook(conclusion)
+web_hook(conclusion_final)
